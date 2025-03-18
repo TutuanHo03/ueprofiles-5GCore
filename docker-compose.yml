@@ -1,0 +1,54 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    environment:
+      - MONGO_INITDB_DATABASE=webue_db
+      - MONGO_INITDB_ROOT_USERNAME=user
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    networks:
+      - ueprofiles-network
+
+  backend:
+    build: 
+      context: ./backend-webUE
+      dockerfile: Dockerfile
+    container_name: ueprofiles-backend
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/webue_db
+    networks:
+      - ueprofiles-network
+
+  frontend:
+    build:
+      context: ./frontend-webue
+      dockerfile: Dockerfile
+    container_name: ueprofiles-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080
+    networks:
+      - ueprofiles-network
+
+networks:
+  ueprofiles-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:

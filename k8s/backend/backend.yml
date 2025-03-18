@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: ueprofiles-5gcore
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend-ue
+          image: ueprofiles-5gcore-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MONGO_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: ueprofiles-configmap
+                  key: MONGO_HOST
+            - name: MONGO_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ueprofiles-configmap
+                  key: MONGO_PORT
+            - name: MONGO_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: ueprofiles-configmap
+                  key: MONGO_DATABASE
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ueprofiles-configmap
+                  key: SERVER_PORT
+            - name: MONGO_USER
+              valueFrom:
+                secretKeyRef:
+                  name: ueprofiles-secrets
+                  key: MONGO_USER
+            - name: MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ueprofiles-secrets
+                  key: MONGO_PASSWORD
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ueprofiles-secrets
+                  key: JWT_SECRET
+---
+# backend service
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: ueprofiles-5gcore
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP

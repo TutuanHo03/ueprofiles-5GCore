@@ -251,19 +251,3 @@ kubectl delete namespace ueprofiles-5gcore
 minikube stop
 ```
 
-## Advanced Configuration
-
-### Using Ingress Instead of Port Forwarding
-
-To use Ingress instead of port forwarding, uncomment the host entry section in the script or manually add the entry:
-
-```bash
-MINIKUBE_IP=$(minikube ip)
-echo "${MINIKUBE_IP} ueprofiles.local" | sudo tee -a /etc/hosts
-```
-
-Then modify your ingress configuration to use this hostname.
-
-### Persistent Storage
-
-The MongoDB deployment uses a Persistent Volume Claim for data storage. You might want to adjust the storage settings based on your needs in `k8s/mongodb/pvc.yaml`.
